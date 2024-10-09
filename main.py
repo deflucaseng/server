@@ -1,7 +1,7 @@
 import requests
 
 def main():
-    url = 'http://localhost:8000'
+    url = 'http://lucasengpiserver.duckdns.org:22'
     
     try:
         response = requests.get(url)

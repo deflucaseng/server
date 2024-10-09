@@ -8,7 +8,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Hello, World!')
 
-PORT = 8000
+PORT = 22
 
 with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
     print(f"Serving at port {PORT}")
