@@ -1,7 +1,7 @@
 import requests
 
 def main():
-    url = 'http://lucasengpiserver.duckdns.org:22'
+    url = 'http://lucasengpiserver.duckdns.org:443'
     
     try:
         response = requests.get(url)
