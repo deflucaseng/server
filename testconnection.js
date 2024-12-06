@@ -1,41 +1,65 @@
 const mysql = require('mysql2/promise');
 
-async function loadData() {
+async function connectToDatabase() {
   const dbConfig = {
-    host: '127.0.0.1',  // Using explicit IP instead of ::1
+    host: '127.0.0.1',
     port: 3306,
-    user: 'root',       // Use your MySQL username
-    password: '',       // Your MySQL password
-    database: 'studentdata',   // Your database name
-    debug: true,        // Enable debugging
-    trace: true
+    user: 'lucas',
+    password: 'raspberry',
+    database: 'studentdatabase',
+    connectTimeout: 10000,
+    socketPath: undefined  // Force TCP/IP connection instead of socket
   };
 
-  let connection;
-  
   try {
-    console.log('Attempting to connect to MySQL...');
-    console.log('Connection config:', { ...dbConfig, password: '****' });
-    
-    connection = await mysql.createConnection(dbConfig);
-    console.log('Successfully connected!');
+    // Create connection pool
+    const pool = mysql.createPool(dbConfig);
     
     // Test the connection
-    const [rows] = await connection.execute('SELECT 1');
-    console.log('Test query successful:', rows);
+    const connection = await pool.getConnection();
+    console.log('Successfully connected to the database.');
     
+    // Example query to verify connection
+    const [rows] = await connection.query('SELECT 1');
+    console.log('Connection test query successful');
+    
+    // Release the connection back to the pool
+    connection.release();
+    
+    return pool;
   } catch (error) {
-    console.error('Connection error details:');
+    console.error('Error connecting to the database:');
     console.error('Error code:', error.code);
-    console.error('Error number:', error.errno);
     console.error('Error message:', error.message);
-    console.error('SQL state:', error.sqlState);
-  } finally {
-    if (connection) {
-      await connection.end();
-      console.log('Connection closed');
+    
+    if (error.code === 'ECONNREFUSED') {
+      console.error('Make sure MySQL server is running and the connection details are correct');
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.error('Check your username and password');
+    } else if (error.code === 'ER_BAD_DB_ERROR') {
+      console.error('Database does not exist');
     }
+    
+    throw error;
   }
 }
 
-loadData();
+// Usage example
+async function main() {
+  try {
+    const pool = await connectToDatabase();
+    
+    // Example query using the pool
+    const [rows] = await pool.query('SELECT NOW() as current_time');
+    console.log('Current time from database:', rows[0].current_time);
+    
+    // Remember to end the pool when your application exits
+    await pool.end();
+  } catch (error) {
+    console.error('Application error:', error);
+    process.exit(1);
+  }
+}
+
+// Run the main function
+main();
