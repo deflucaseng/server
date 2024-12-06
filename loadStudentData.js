@@ -103,20 +103,19 @@ const data = [
 async function loadData() {
   // Database configuration
   const dbConfig = {
-	host: '127.0.0.1',
-	port: 3306,
-	user: 'lucas',
-	password: 'raspberry',
-	database: 'studentdatabase',
-	connectTimeout: 10000,
-	socketPath: undefined  // Force TCP/IP connection instead of socket
+    host: '127.0.0.1',
+    port: 3306,
+    user: 'lucas',
+    password: 'raspberry',
+    database: 'studentdatabase',
+    connectTimeout: 10000,
+    socketPath: undefined  // Force TCP/IP connection instead of socket
   };
-
   let connection;
   
   try {
     // Create connection
-    connection = await mysql.createConnection(dbConfig);
+    connection = await mysql.createPool(dbConfig);
     
     // Create table if it doesn't exist
     const createTableQuery = `

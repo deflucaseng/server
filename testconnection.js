@@ -19,6 +19,22 @@ async function connectToDatabase() {
     const connection = await pool.getConnection();
     console.log('Successfully connected to the database.');
     
+
+    const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS students (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        gender ENUM('Male', 'Female') NOT NULL,
+        physics INT NOT NULL,
+        maths INT NOT NULL,
+        english INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    
+    await connection.execute(createTableQuery);
+    console.log('Table created or already exists');
+
     // Example query to verify connection
     const [rows] = await connection.query('SELECT 1');
     console.log('Connection test query successful');
