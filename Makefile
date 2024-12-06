@@ -5,7 +5,7 @@ server:
 
 
 client:
-	python3 main.py http://lucasengpiserver.duckdns.org:8000
+	python3 main.py
 
 full:
 
