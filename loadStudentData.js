@@ -155,7 +155,15 @@ async function loadData() {
     console.log(`Total records in database: ${rows[0].count}`);
     
   } catch (error) {
-    console.error('Error:', error);
+	console.error('Detailed connection error:', {
+		message: error.message,
+		code: error.code,
+		errno: error.errno,
+		sqlState: error.sqlState,
+		host: dbConfig.host,
+		port: dbConfig.port
+	  });
+	  throw error;
   } finally {
     if (connection) {
       await connection.end();
