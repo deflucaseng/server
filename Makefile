@@ -1,4 +1,4 @@
-.PHONY server client full
+.PHONY: server client full
 
 server:
 	node server.js
