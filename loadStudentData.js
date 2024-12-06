@@ -104,9 +104,9 @@ async function loadData() {
   // Database configuration
   const dbConfig = {
     host: 'localhost',
-    user: 'your_username',
-    password: 'your_password',
-    database: 'your_database'
+    user: 'lucas',
+    password: 'raspberry',
+    database: 'studentdatabase'
   };
 
   let connection;
