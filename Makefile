@@ -1,6 +1,7 @@
 .PHONY server client full
 
 server:
+	node server.js
 
 
 client:
