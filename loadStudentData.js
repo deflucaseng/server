@@ -103,11 +103,13 @@ const data = [
 async function loadData() {
   // Database configuration
   const dbConfig = {
-    host: '127.0.0.1',
+	host: '127.0.0.1',
 	port: 3306,
-    user: 'lucas',
-    password: 'raspberry',
-    database: 'studentdatabase'
+	user: 'lucas',
+	password: 'raspberry',
+	database: 'studentdatabase',
+	connectTimeout: 10000,
+	socketPath: undefined  // Force TCP/IP connection instead of socket
   };
 
   let connection;
