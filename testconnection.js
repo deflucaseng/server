@@ -50,8 +50,7 @@ async function main() {
     const pool = await connectToDatabase();
     
     // Fixed query using underscore in alias name
-    const [rows] = await pool.query('SELECT NOW() as current_timestamp');
-    console.log('Current time from database:', rows[0].current_timestamp);
+
     
     // Remember to end the pool when your application exits
     await pool.end();
