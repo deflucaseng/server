@@ -107,7 +107,7 @@ async function connectToDatabase() {
     host: '127.0.0.1',
     port: 3306,
     user: 'lucas',
-    password: 'raspberry',
+    password: 'Neon96carN',
     database: 'studentdatabase',
     connectTimeout: 10000,
     socketPath: undefined  // Force TCP/IP connection instead of socket
@@ -122,26 +122,7 @@ async function connectToDatabase() {
     console.log('Successfully connected to the database.');
     
 
-    const insertQuery = `
-      INSERT INTO students (name, gender, physics, maths, english)
-      VALUES (?, ?, ?, ?, ?)
-    `;
-    
-    for (const student of data) {
-      await connection.execute(insertQuery, [
-        student.name,
-        student.gender,
-        student.physics,
-        student.maths,
-        student.english
-      ]);
-    }
-    
-    console.log(`Successfully inserted ${data.length} records`);
-    
-    // Verify the data
-    const [rows] = await connection.execute('SELECT COUNT(*) as count FROM students');
-    console.log(`Total records in database: ${rows[0].count}`);
+
     
     // Release the connection back to the pool
     connection.release();

@@ -1,63 +1,82 @@
-const express = require('express');
-const mysql = require('mysql2/promise'); // Using mysql2 for Promise support
-const app = express();
+const mysql = require('mysql2/promise');
 
-// Database configuration
-const dbConfig = {
-  host: 'localhost',
-  user: 'your_username',
-  password: 'your_password',
-  database: 'your_database'
-};
 
-// Create database connection pool
-const pool = mysql.createPool(dbConfig);
+async function connectToDatabase() {
+  const dbConfig = {
+    host: '127.0.0.1',
+    port: 3306,
+    user: 'lucas',
+    password: 'Neon96carN',
+    database: 'studentdatabase',
+    connectTimeout: 10000,
+    socketPath: undefined  // Force TCP/IP connection instead of socket
+  };
 
-// Middleware to parse JSON requests
-app.use(express.json());
-
-// Route to get data with limit parameter
-app.get('/api/data', async (req, res) => {
   try {
-    // Get the limit from query parameter, default to 10 if not specified
-    const limit = parseInt(req.query.limit) || 10;
+    // Create connection pool
+    const pool = mysql.createPool(dbConfig);
     
-    // Validate limit
-    if (limit < 0 || limit > 100) {
-      return res.status(400).json({
-        error: 'Limit must be between 0 and 100'
-      });
-    }
-
-    // Get database connection from pool
+    // Test the connection
     const connection = await pool.getConnection();
+    console.log('Successfully connected to the database.');
     
-    try {
-      // Execute query with LIMIT
-      const [rows] = await connection.execute(
-        'SELECT * FROM your_table LIMIT ?',
-        [limit]
-      );
 
-      // Return JSON response
-      res.json({
-        count: rows.length,
-        data: rows
-      });
-    } finally {
-      // Always release the connection back to the pool
-      connection.release();
-    }
+
+    
+    // Release the connection back to the pool
+    connection.release();
+    
+    return pool;
   } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({
-      error: 'Internal server error'
-    });
+    console.error('Error connecting to the database:');
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    
+    if (error.code === 'ECONNREFUSED') {
+      console.error('Make sure MySQL server is running and the connection details are correct');
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.error('Check your username and password');
+    } else if (error.code === 'ER_BAD_DB_ERROR') {
+      console.error('Database does not exist');
+    }
+    
+    throw error;
   }
-});
+}
 
-// Start server
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+async function getAllRecords(pool) {
+  try {
+    // Execute SELECT * query
+    const [rows] = await pool.execute('SELECT * FROM studentdatabase.*');
+    
+    // Convert the results to JSON
+    const jsonResult = JSON.stringify(rows, null, 2);
+    
+    console.log('Query results:', jsonResult);
+    return jsonResult;
+  } catch (error) {
+    console.error('Error executing query:', error);
+    throw error;
+  }
+}
+
+// Usage example
+async function main() {
+  try {
+    const pool = await connectToDatabase();
+    
+    // Get all records and convert to JSON
+    const results = await getAllRecords(pool);
+    
+    // Remember to end the pool when your application exits
+    await pool.end();
+    
+    return results;
+  } catch (error) {
+    console.error('Application error:', error);
+    process.exit(1);
+  }
+}
+
+// Run the main function
+main();

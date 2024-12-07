@@ -1,8 +1,8 @@
 import requests
 
-def send_request(url, input_string):
+def send_request(url, ):
     try:
-        response = requests.get(url, params={'input': input_string})
+        response = requests.get(url)
         print(f"Status Code: {response.status_code}")
         print(f"Response Content: {response.text}")
     except requests.exceptions.RequestException as e:
@@ -10,6 +10,5 @@ def send_request(url, input_string):
 
 if __name__ == '__main__':
     url = "http://lucasengpiserver.duckdns.org:8000"
-    input_string = input("Enter a string to send with the request: ")
     
-    send_request(url, input_string)
+    send_request(url)
