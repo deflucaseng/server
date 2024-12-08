@@ -7,6 +7,9 @@ const app = express();
 const port = 8000;
 const host = '0.0.0.0';  // Listen on all network interfaces
 
+// Add JSON body parser middleware
+app.use(express.json());
+
 // Enable CORS for your specific domain
 app.use(cors({
   origin: 'http://lucasengpiserver.duckdns.org',
@@ -61,10 +64,61 @@ const logIP = (req, res, next) => {
 // Apply IP logging middleware to all routes
 app.use(logIP);
 
-// API endpoint to get all records
+// Basic query validation middleware
+const validateQuery = (req, res, next) => {
+  const { query } = req.body;
+  
+  if (!query) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+  
+  // Basic security checks
+  const forbiddenKeywords = ['DROP', 'DELETE', 'TRUNCATE', 'INSERT', 'UPDATE', 'CREATE', 'ALTER'];
+  const upperQuery = query.toUpperCase();
+  
+  if (!upperQuery.startsWith('SELECT')) {
+    return res.status(403).json({ error: 'Only SELECT queries are allowed' });
+  }
+  
+  for (const keyword of forbiddenKeywords) {
+    if (upperQuery.includes(keyword)) {
+      return res.status(403).json({ 
+        error: 'Query contains forbidden keywords',
+        message: `The keyword "${keyword}" is not allowed`
+      });
+    }
+  }
+  
+  next();
+};
+
+// API endpoint to execute custom query
+app.post('/api/query', validateQuery, async (req, res) => {
+  const { query, params } = req.body;
+  
+  try {
+    console.log(`Executing query: ${query}`);
+    console.log(`With parameters:`, params || []);
+    
+    const [rows] = await pool.execute(query, params || []);
+    res.json({
+      success: true,
+      results: rows,
+      rowCount: rows.length
+    });
+  } catch (error) {
+    console.error('Error executing query:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Database error', 
+      message: error.message 
+    });
+  }
+});
+
+// Keep the original endpoint for backward compatibility
 app.get('/api/students', async (req, res) => {
   try {
-    // Replace 'students' with your actual table name
     const [rows] = await pool.execute('SELECT * FROM students');
     res.json(rows);
   } catch (error) {
