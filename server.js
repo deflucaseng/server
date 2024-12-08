@@ -4,12 +4,12 @@ const cors = require('cors');
 
 // Create Express app
 const app = express();
-const port = 3000;
+const port = 8000;
 const host = '0.0.0.0';  // Listen on all network interfaces
 
 // Enable CORS for your specific domain
 app.use(cors({
-  origin: 'https://lucasengpiserver.duckdns.org',
+  origin: 'http://lucasengpiserver.duckdns.org',
   optionsSuccessStatus: 200
 }));
 
@@ -50,6 +50,17 @@ async function initializeDatabase() {
   }
 }
 
+// Middleware to log IP addresses
+const logIP = (req, res, next) => {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] Request from IP: ${ip} - ${req.method} ${req.path}`);
+  next();
+};
+
+// Apply IP logging middleware to all routes
+app.use(logIP);
+
 // API endpoint to get all records
 app.get('/api/students', async (req, res) => {
   try {
@@ -63,6 +74,10 @@ app.get('/api/students', async (req, res) => {
       message: error.message 
     });
   }
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 // Error handling middleware
