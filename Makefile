@@ -1,4 +1,4 @@
-.PHONY: server client full
+.PHONY: server client clientpush serverpush
 
 server:
 	node server.js
@@ -7,7 +7,16 @@ server:
 client:
 	python3 main.py
 
-full:
+clientpush:
+	git add .
+	git commit -m "clientpush"
+	git push
+
+
+serverpush:
+	git add .
+	git commit -m "serverpush"
+	git push
 
 
 
