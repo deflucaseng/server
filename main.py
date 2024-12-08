@@ -65,11 +65,6 @@ def main():
             "name": "Get students with high grades",
             "query": "SELECT * FROM students WHERE maths > ?",
             "params": [90]
-        },
-        {
-            "name": "Get student count by grade level",
-            "query": "SELECT *, COUNT(*) as student_count FROM students GROUP BY gender",
-            "params": []
         }
     ]
     
