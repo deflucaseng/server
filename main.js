@@ -72,21 +72,16 @@ async function processResponse(response) {
     }
 }
 
-async function main() {
+async function main(inputtedquery) {
     // Configuration
     const baseUrl = 'http://lucasengpiserver.duckdns.org:8000';
     
     // Example queries
     const queries = [
         {
-            name: 'Get all students',
-            query: 'SELECT * FROM students',
+            name: 'Execute a given query',
+            query: inputtedquery,
             params: []
-        },
-        {
-            name: 'Get students with high grades',
-            query: 'SELECT * FROM students WHERE maths > ?',
-            params: [90]
         }
     ];
     
