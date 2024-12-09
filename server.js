@@ -10,9 +10,18 @@ const host = '0.0.0.0';  // Listen on all network interfaces
 // Add JSON body parser middleware
 app.use(express.json());
 
+
+
 // Enable CORS for your specific domain
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 app.use(cors({
-  origin: 'http://lucasengpiserver.duckdns.org',
+  origin: isDevelopment
+  ? '*'
+  : [
+    'http://lucasengpiserver.duckdns.org',
+    'http://127.0.0.1:5500'
+  ],
   optionsSuccessStatus: 200
 }));
 
