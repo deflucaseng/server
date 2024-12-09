@@ -1,4 +1,7 @@
-.PHONY: server client clientpush serverpush
+.PHONY: server client clientpush serverpush jsclient
+
+jsclient:
+	node jsclient.js
 
 server:
 	node server.js
