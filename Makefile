@@ -1,7 +1,7 @@
 .PHONY: server client clientpush serverpush jsclient
 
 jsclient:
-	node jsclient.js
+	node main.js
 
 server:
 	node server.js
