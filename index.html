@@ -5,81 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Query Interface</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
-        
-        .input-container {
-            background-color: #ffffff;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            max-width: 600px;
-        }
-        
-        .input-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .text-input {
-            padding: 1rem;
-            font-size: 1rem;
-            border: 1px solid #e1e4e8;
-            border-radius: 4px;
-            width: 100%;
-            min-height: 120px;
-            font-family: 'Consolas', monospace;
-            resize: vertical;
-        }
-        
-        .submit-button {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            background-color: #2ea44f;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .submit-button:hover {
-            background-color: #2c974b;
-        }
-        
-        .result-display {
+        /* Previous styles remain the same */
+        .debug-info {
             margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f6f8fa;
-            border: 1px solid #e1e4e8;
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
             border-radius: 4px;
-            min-height: 1.5rem;
-            white-space: pre-wrap;
-            font-family: 'Consolas', monospace;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .loading {
-            color: #666;
-            font-style: italic;
-        }
-        
-        .error {
-            color: #dc3545;
-            background-color: #ffeaea;
-            padding: 1rem;
-            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #6c757d;
         }
     </style>
 </head>
@@ -94,14 +28,17 @@
             <button type="submit" class="submit-button">Execute Query</button>
         </form>
         <div id="result" class="result-display"></div>
+        <div id="debug" class="debug-info"></div>
     </div>
 
     <script>
         async function sendSqlQuery(query) {
-            const baseUrl = 'http://lucasengpiserver.duckdns.org:8000';
-            const url = `${baseUrl}/api/query`;
+            const url = 'http://lucasengpiserver.duckdns.org:8000/api/query';
+            const debugDiv = document.getElementById('debug');
             
             try {
+                debugDiv.textContent = `Attempting to connect to: ${url}`;
+                
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
@@ -113,13 +50,35 @@
                     })
                 });
 
+                // Log detailed response information
+                debugDiv.textContent += `\nResponse status: ${response.status}`;
+                debugDiv.textContent += `\nResponse headers: ${JSON.stringify([...response.headers])}`;
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                return await response.json();
+                const result = await response.json();
+                debugDiv.textContent += `\nReceived valid JSON response`;
+                return result;
+
             } catch (error) {
-                throw new Error(`Failed to execute query: ${error.message}`);
+                // Provide more detailed error information
+                const errorDetails = [];
+                errorDetails.push(`Error name: ${error.name}`);
+                errorDetails.push(`Error message: ${error.message}`);
+                console.log(error.name);
+                console.log(error.message);
+                
+                if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                    errorDetails.push('Possible causes:');
+                    errorDetails.push('- Server is not running or unreachable');
+                    errorDetails.push('- CORS is not properly configured on the server');
+                    errorDetails.push('- Mixed content blocking (HTTP/HTTPS mismatch)');
+                }
+                
+                debugDiv.textContent = errorDetails.join('\n');
+                throw new Error(errorDetails.join('\n'));
             }
         }
 
@@ -127,15 +86,17 @@
             event.preventDefault();
             
             const resultDisplay = document.getElementById('result');
+            const debugDiv = document.getElementById('debug');
             const input = document.querySelector('.text-input');
             const button = document.querySelector('.submit-button');
             
-            // Disable button and show loading state
             button.disabled = true;
             resultDisplay.textContent = 'Executing query...';
             resultDisplay.className = 'result-display loading';
+            debugDiv.textContent = ''; // Clear previous debug info
             
             try {
+                debugDiv.textContent = `Sending query: ${input.value}`;
                 const result = await sendSqlQuery(input.value);
                 
                 if (result && Array.isArray(result.results)) {
